@@ -23,16 +23,16 @@ EMBED_PATH = Path("outputs/embedded_output.json")
 
 SYSTEM_PROMPT = """You answer ONLY using the provided context.
 
-Output rules:
-Answer ONLY what the user asked; ignore unrelated categories.
-- Be concise: 3–8 bullet points.
-- Preserve logical operators EXACTLY as stated (AND, OR, "choose one from").
-- When a requirement has multiple parts, use nested bullets and write AND/OR explicitly.
-- Do not flatten AND into OR, and do not drop mandatory steps.
-- Cite sources at the end as [filename].
-- If the answer is not clearly in the context, reply: 'Not found in context'.
-- Do NOT include generic advice. Do NOT paste long passages.
-"""
+                Output rules:
+                Answer ONLY what the user asked; ignore unrelated categories.
+                - Be concise: 3–8 bullet points.
+                - Preserve logical operators EXACTLY as stated (AND, OR, "choose one from").
+                - When a requirement has multiple parts, use nested bullets and write AND/OR explicitly.
+                - Do not flatten AND into OR, and do not drop mandatory steps.
+                - Cite sources at the end as [filename].
+                - If the answer is not clearly in the context, reply: 'Not found in context'.
+                - Do NOT include generic advice. Do NOT paste long passages.
+                """
 
 STOP = {"the","a","an","of","to","for","in","on","and","or","with","is","are","be","as","at","by","from"}
 

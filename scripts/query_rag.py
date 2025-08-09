@@ -22,13 +22,13 @@ MAX_CHARS_PER_CHUNK = 2000
 
 SYSTEM_PROMPT = """You answer ONLY using the provided context.
 
-Rules:
-- Be concise: 3–6 bullet points.
-- Answer only what was asked; ignore unrelated sections.
-- Do not copy long passages; summarize what’s in context.
-- If not clearly in context, say 'Not found in context'.
-- Cite sources at the end as [filename].
-"""
+                Rules:
+                - Be concise: 3–6 bullet points.
+                - Answer only what was asked; ignore unrelated sections.
+                - Do not copy long passages; summarize what’s in context.
+                - If not clearly in context, say 'Not found in context'.
+                - Cite sources at the end as [filename].
+                """
 
 def build_context(chunks):
     parts = []
