@@ -11,7 +11,8 @@ A small, time-boxed solo project to turn meeting-room knowledge into a tangible 
 - **Embeddings:** Ollama `nomic-embed-text`  
 - **Vector DB:** FAISS (cosine, with simple MMR)  
 - **LLM:** Ollama `mistral`  
-- **Data:** `data/*.md` (UO CS pages, section-aware chunking)
+- **Data:** `data/*.md` (UO CS pages, section-aware chunking)  
+- **UI:** Streamlit (`app.py`) for quick local testing
 
 ## Setup
 ```bash
@@ -28,13 +29,21 @@ python scripts/embed_documents.py
 
 # 2) Build FAISS index (outputs/faiss_index.bin)
 python scripts/build_faiss.py
+```
 
-# 3) Query end-to-end
+### CLI mode
+```bash
 python scripts/query_rag.py
 # example prompts:
 # - Explain the science requirement for the CS major, including eligible subjects.
 # - List all concentrations available for the CS major.
 # - What are the lower-division core courses for the CS major?
+```
+
+### Streamlit mode
+```bash
+streamlit run app.py
+# Opens a minimal UI in your browser (text box, retrieved chunks, LLM answer)
 ```
 
 ## What it shows
@@ -48,6 +57,5 @@ python scripts/query_rag.py
 - Occasionally a nearby requirement line (e.g., Writing) appears—kept to show raw grounding + citations.
 
 ## Next?
-- Streamlit micro-UI (1 text box + results)  
 - Deterministic list rendering for complex “AND/OR” requirement blocks  
 - Expand/clean data sources
