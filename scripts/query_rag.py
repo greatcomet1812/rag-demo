@@ -18,7 +18,7 @@ from search_faiss import retrieve
 from ollama import chat
 
 TOP_K = 4
-MAX_CHARS_PER_CHUNK = 900
+MAX_CHARS_PER_CHUNK = 2000
 
 SYSTEM_PROMPT = """You answer ONLY using the provided context.
 

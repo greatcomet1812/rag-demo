@@ -1,15 +1,24 @@
-# app.py
-# Minimal Streamlit UI for your local RAG demo (Ollama + FAISS + Mistral)
+"""
+app.py
+------
+Minimal Streamlit UI for local RAG demo:
+1) Retrieve with cosine+MMR (via search_faiss.retrieve)
+2) Build a section-aware context (top-k trimmed chunks with file/section headers)
+3) Ask Mistral (via Ollama) with a concise prompt and show citations
+
+Usage:
+    streamlit run app.py
+"""
 
 import sys
 from pathlib import Path
 import streamlit as st
 
-# make `scripts/` importable
+# Allow imports from scripts/
 sys.path.append(str(Path(__file__).resolve().parent / "scripts"))
 
-from search_faiss import retrieve  # your cosine+MMR retriever
-from ollama import chat
+from search_faiss import retrieve   # cosine similarity + MMR retriever
+from ollama import chat             # local Ollama API call wrapper
 
 TOP_K_DEFAULT = 4
 MAX_CHARS_PER_CHUNK = 900
@@ -42,21 +51,23 @@ def ask_llm(query, context_text, srcs, model_name="mistral"):
     cites = " ".join(f"[{s}]" for s in sorted(srcs))
     return f"{answer}\n\nSources: {cites}"
 
+# Streamlit UI setup
 st.set_page_config(page_title="Local RAG Assistant", page_icon="🧭", layout="wide")
-
 st.title("Local RAG Assistant")
 st.caption("Ollama + FAISS + Mistral · section-aware retrieval · citations")
 
+# Sidebar settings
 with st.sidebar:
     st.subheader("Settings")
     model = st.text_input("Ollama model", value="mistral", help="Must be available via `ollama pull`")
-    top_k = st.slider("Top‑K retrieved chunks", min_value=2, max_value=8, value=TOP_K_DEFAULT, step=1)
+    top_k = st.slider("Top-K retrieved chunks", min_value=2, max_value=8, value=TOP_K_DEFAULT, step=1)
     show_chunks = st.checkbox("Show retrieved chunks", value=True)
     st.markdown("---")
     st.markdown("**Tips**")
     st.markdown("- Ask specific questions (e.g., *science requirement*, *concentrations*, *lower-division core*).")
     st.markdown("- Answers are grounded in `data/*.md` and cite source files.")
 
+# Main input area
 query = st.text_input("Ask about the UO CS program…")
 go = st.button("Ask")
 
