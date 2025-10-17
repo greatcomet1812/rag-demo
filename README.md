@@ -4,7 +4,7 @@ Minimal, fully-local **RAG** demo that answers questions about the UO CS program
 Built to show end-to-end understanding of the RAG pipeline.
 
 ## Why this exists
-A small, time-boxed solo project to turn meeting-room knowledge into a tangible result:  
+A small-scale solo project to turn theoretical knowledge into a tangible result:  
 **documents → embeddings → vector search → grounded LLM answer with citations**.
 
 ## Stack
