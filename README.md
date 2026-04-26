@@ -5,16 +5,6 @@ Built to show end-to-end understanding of the RAG pipeline.
 
 ![Main demo](./assets/rag-demo-main.png)
 
-Main UI: question input, generated answer, and source citation.
-
-Example query:
-> What are the lower-division core courses for the CS major?
-
----
-
-![Debug view](./assets/rag-demo-debug.png)
-
-Debug view: retrieved chunks and similarity scores for inspecting retrieval behavior.
 
 ## TL;DR
 - Fully local RAG system (Ollama + FAISS + Mistral)
