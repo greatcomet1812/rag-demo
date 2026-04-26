@@ -1,7 +1,25 @@
 # Local RAG Assistant (Demo)
 
-Minimal, fully-local **RAG** demo that answers questions about the UO CS program using local markdown docs.  
+Minimal, fully-local **RAG** demo that answers questions about the University of Oregon(UO) Computer Science program using local markdown docs.  
 Built to show end-to-end understanding of the RAG pipeline.
+
+![Main demo](./assets/rag-demo-main.png)
+
+Main UI: question input, generated answer, and source citation.
+
+Example query:
+> What are the lower-division core courses for the CS major?
+
+---
+
+![Debug view](./assets/rag-demo-debug.png)
+
+Debug view: retrieved chunks and similarity scores for inspecting retrieval behavior.
+
+## TL;DR
+- Fully local RAG system (Ollama + FAISS + Mistral)
+- Answers questions over real documents (UO CS pages)
+- Section-aware retrieval + source citation
 
 ## Why this exists
 A small-scale solo project to turn theoretical knowledge into a tangible result:  
@@ -15,6 +33,13 @@ A small-scale solo project to turn theoretical knowledge into a tangible result:
 - **UI:** Streamlit (`app.py`) for quick local testing
 
 ## Setup
+### 1) Install Ollama
+This project requires **Ollama** to be installed separately from the Python packages.
+
+- Install from [ollama.com](https://ollama.com)
+- Make sure Ollama is running locally before querying the app
+
+### 2) Python environment
 ```bash
 python3 -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
@@ -45,6 +70,7 @@ python scripts/query_rag.py
 streamlit run app.py
 # Opens a minimal UI in your browser (text box, retrieved chunks, LLM answer)
 ```
+
 
 ## What it shows
 - Local embeddings → FAISS cosine retrieval (+ MMR)  

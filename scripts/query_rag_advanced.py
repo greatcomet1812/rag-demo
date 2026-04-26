@@ -59,12 +59,28 @@ def line_relevant(line: str, qterms: set) -> bool:
     return any(w in l for w in qterms)
 
 def score_chunk_for_query(chunk: dict, qterms: set) -> float:
-    # Prefer chunks whose section path or text overlaps query terms
-    sec = " ".join(chunk.get("section_path", [])).lower()
+    # Prefer section-title matches much more strongly than long-body overlap.
+    path_parts = chunk.get("section_path", [])
+    sec = " ".join(path_parts).lower()
+    title = (path_parts[-1] if path_parts else chunk.get("section_title", "")).lower()
     txt = chunk["text"][:MAX_CHARS_PER_CHUNK].lower()
+
+    title_hits = sum(1 for w in qterms if w in title)
     sec_hits = sum(1 for w in qterms if w in sec)
     txt_hits = sum(1 for w in qterms if w in txt)
-    return sec_hits * 1.2 + txt_hits * 1.0
+
+    score = title_hits * 3.0 + sec_hits * 1.5 + txt_hits * 0.35
+
+    # Give a further boost when the heading covers a large share of the query terms.
+    if qterms:
+        title_coverage = title_hits / len(qterms)
+        sec_coverage = sec_hits / len(qterms)
+        if title_coverage >= 0.45:
+            score += 2.0
+        if sec_coverage >= 0.60:
+            score += 1.5
+
+    return score
 
 def load_full_section(source_file: str, section_path: list) -> list:
     """Load ALL chunks from the same file+section_path to avoid partial lists."""
@@ -102,18 +118,18 @@ def extract_relevant_lines_from_text(text: str, qterms: set, max_lines: int = 24
 
 def build_scoped_context(query: str, retrieved: list):
     qterms = set(tokenize(query))
-    # Re-score retrieved chunks by query overlap; pick the best section
+    # Re-score retrieved chunks locally so we can prefer the most on-topic section title.
     rescored = sorted(retrieved, key=lambda c: score_chunk_for_query(c, qterms), reverse=True)
     if not rescored:
         return "", set()
 
-    # Choose the section of the top rescored chunk
+    # Use the best section as the anchor, then pull in all chunks from that same section.
     best = rescored[0]
     section_path = best.get("section_path", [])
     source_file = best.get("source_file", "")
     stitched_chunks = load_full_section(source_file, section_path) or [best]
 
-    # Concatenate full section text (in original order as stored)
+    # Stitch the full section back together before filtering lines for the prompt.
     stitched_text = "\n".join((c.get("text") or "")[:MAX_CHARS_PER_CHUNK] for c in stitched_chunks)
 
     # Extract only relevant lines (bullets, colon-lines, course codes, query-term lines)
@@ -127,13 +143,18 @@ def build_scoped_context(query: str, retrieved: list):
             parts.append(f"{hdr}\n{c['text'][:MAX_CHARS_PER_CHUNK]}")
         return "\n\n---\n\n".join(parts), {c["source_file"] for c in rescored[:max(3, TOP_K)]}
 
-    # Build compact, attributed context (single source here, but keep structure)
+    # Build a compact prompt block with source attribution.
     section = " > ".join(section_path)
     header = f"[Source: {source_file} | Section: {section}]"
     context_text = f"{header}\n" + "\n".join(lines)
     return context_text, {source_file}
 
-def generate_answer(query: str, retrieved_chunks: list) -> str:
+def generate_answer(
+    query: str,
+    retrieved_chunks: list,
+    model_name: str = "mistral",
+    debug_show_context: bool = False,
+):
     """
     Build scoped context (stitch full section, keep relevant lines),
     show it (debug), then ask Mistral via Ollama.
@@ -142,8 +163,7 @@ def generate_answer(query: str, retrieved_chunks: list) -> str:
     context_text, srcs = build_scoped_context(query, retrieved_chunks)
 
     # Debug: see exactly what the model will read
-    DEBUG_SHOW_CONTEXT = True  # set False when you’re done debugging
-    if DEBUG_SHOW_CONTEXT:
+    if debug_show_context:
         print("\n--- CONTEXT SENT TO MODEL ---\n")
         print(context_text)
         print("\n--- END CONTEXT ---\n")
@@ -153,7 +173,7 @@ def generate_answer(query: str, retrieved_chunks: list) -> str:
         {"role": "system", "content": SYSTEM_PROMPT},
         {"role": "user", "content": f"Question: {query}\n\nContext:\n{context_text}\n\nReturn: bullet points only."}
     ]
-    resp = chat(model="mistral", messages=messages)
+    resp = chat(model=model_name, messages=messages)
     answer = resp["message"]["content"].strip()
 
     # Citations
